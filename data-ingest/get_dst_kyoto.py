@@ -1,8 +1,7 @@
 if __name__ == "__main__":
-    import dstUtils
-    dsU = dstUtils.DownloadDst()
-    # dsU.insert_dst_values_yearwise()
-    dsU.insert_real_time_values()
+    import get_dst_kyoto
+    dsU = get_dst_kyoto.DownloadDst()
+    dsU.get_dst_values_yearwise()
 
 class DownloadDst(object):
     """
@@ -15,24 +14,11 @@ class DownloadDst(object):
         self.provisional = "dst_provisional"
         self.final = "dst_final"
 
-    def insert_real_time_values(self):
-        import dbUtils
-        # create a db obj to insert values into db
-        dbo = dbUtils.DbUtils()
-        rtDstData = self.get_realtime_data()
-        if rtDstData is not None:
-            print "inserting RT values to db"
-            dbo.fill_dst_tab(rtDstData)
-        else:
-            print "data returned is None, check again!!!"
-        return
-
-    def insert_dst_values_yearwise(self, yearRange=[2000,2016]):
+    def get_dst_values_yearwise(self, yearRange=[2000,2016], \
+            saveinFile=True, dstOutFile="dst_out_file.csv"):
         import pandas
         import datetime
-        import dbUtils
-        # create a db obj to insert values into db
-        dbo = dbUtils.DbUtils()
+        import os
         # make sure the yearRange is appropriate
         if not isinstance(yearRange,list):
             print "need a 2-element list for year range-->", yearRange
@@ -50,17 +36,23 @@ class DownloadDst(object):
         daterange = pandas.date_range(start_date, end_date, freq="M")
         for dt in daterange:
             print "working with year,month-->", dt.year, dt.month
-            currDstData = self.get_old_data( dt.year, dt.month )
-            if currDstData is not None:
-                print "inserting values to db"
-                dbo.fill_dst_tab(currDstData)
-            else:
-                print "data returned is None, check again!!!"
+            currDstDF = self.get_old_data( dt.year, dt.month )
+            if saveinFile:
+                if currDstDF is not None:
+                    if not os.path.isfile(dstOutFile):
+                        currDstDF.to_csv(dstOutFile, sep=' ',\
+                               index=False)
+                    else:
+                        currDstDF.to_csv(dstOutFile, sep=' ', mode='a',\
+                               index=False, header=False)
+                else:
+                    print "data returned is None, check again!!!"
 
     def get_old_data(self, year, month):
         import urllib
         import bs4
         import datetime
+        import pandas
         # get data for a given month, year
         # validate year and month are int
         if not isinstance(year, int):
@@ -126,7 +118,12 @@ class DownloadDst(object):
                                 dst_val.append( float( 'nan' ) )
                             if cols > 0 :
                                 date_dst_arr.append ( date_dst_arr[-1] + dst_time_del )
-                return (dst_val,date_dst_arr)
+                # convert dst data to a dataframe
+                dstDF = pandas.DataFrame(
+                    {'dst_date': date_dst_arr,
+                     'dst_index': dst_val
+                    })
+                return dstDF
             except:
                 print "data download from url failed-->" + currUrl
                 return None
@@ -193,7 +190,12 @@ class DownloadDst(object):
                                 dst_val.append( float( 'nan' ) )
                             if cols > 0 :
                                 date_dst_arr.append ( date_dst_arr[-1] + dst_time_del )
-                return (dst_val,date_dst_arr)
+                # convert dst data to a dataframe
+                dstDF = pandas.DataFrame(
+                    {'dst_date': date_dst_arr,
+                     'dst_index': dst_val
+                    })
+                return dstDF
             except:
                 print "data download from url failed-->" + currUrl
                 return None
