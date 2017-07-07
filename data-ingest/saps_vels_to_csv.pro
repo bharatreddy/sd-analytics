@@ -50,6 +50,8 @@ for srchDay=0.d,double(ndays_search) do begin
 	;; loop through all the radars
 	for rcInd = 0, n_elements(allRadCodeList)-1 do begin
 		
+		if allRadCodeList[rcInd] ne "hal" then continue
+
 
 		rad_fit_read, dateDay, allRadCodeList[rcInd]
 		data_index = rad_fit_get_data_index()
@@ -89,7 +91,7 @@ for srchDay=0.d,double(ndays_search) do begin
 			radar_gates = sz[1]
 
 
-			print, "curr radar, day---->", allRadCodeList[rcInd], datesel,timesel
+			print, "curr radar, day---->", allRadCodeList[rcInd], datesel,timesel, b, scan_beams
 
 			; loop through and extract
 			for b=0, radar_beams-1 do begin
