@@ -15,7 +15,7 @@ if __name__ == "__main__":
             typeName: {
                 'properties': {
                     'dst_index': {'type': 'float'},
-                    'date': {'type': 'string'},
+                    'ts': {'type': 'date', 'format':'dateOptionalTime'},
                }}}
     }
     esU.createIndex( indexName, \
@@ -38,20 +38,21 @@ class IngestElastic(object):
         if self.es.indices.exists(indexName):
             if deleteOld:
                 print "DELETING AND RECREATING EXISTING INDEX--->",\
-                     INDEX_NAME
-                res = es.indices.delete(index=INDEX_NAME)
+                     indexName
+                res = self.es.indices.delete(index=indexName)
                 if requestBody is not None:
-                    res = es.indices.create( index = INDEX_NAME,\
+                    res = self.es.indices.create( index = indexName,\
                          body = requestBody )
                 else:
-                    res = es.indices.create( index = INDEX_NAME )
+                    res = self.es.indices.create( index = indexName )
             else:
-                print "INDEX ", INDEX_NAME, " exists! Recheck!"
+                print "INDEX ", indexName, " exists! Recheck!"
         return
 
     def get_dst_json(self, inpDstFile, indexName='indices',\
          typeName="dst_data"):
         import pandas
+        import datetime
         # Get dst data from csv as an array of jsons
         dstRecs = [] 
         # read data into a pandas DF
@@ -61,7 +62,11 @@ class IngestElastic(object):
         for ind, row in dstDF.iterrows():
             dstDict = {}
             dstDict["dst_index"] = row["dst_index"]
-            dstDict["date"] = row["dst_date"]
+            epoch = datetime.datetime.utcfromtimestamp(0)
+            currDtObj = datetime.datetime.strptime(row["dst_date"], '%Y-%m-%d %H:%M:%S')
+            newDtObj = currDtObj.strftime( "%Y-%m-%dT%H:%M:%S" )
+            dstDict["ts"] = newDtObj
+            print dstDict
             op_dict = {
                 "index": {
                     "_index": indexName, 
@@ -75,6 +80,7 @@ class IngestElastic(object):
 
     def insert_data_recs(self, indexName, dataRecs):
         # Insert data into elastic search
+        print "inserting data into elastic search"
         res = self.es.bulk(index = indexName,\
              body = dataRecs, refresh = True)
         
