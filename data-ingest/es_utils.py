@@ -1,32 +1,6 @@
-
-if __name__ == "__main__":
-    import elasticInput
-    esU = elasticInput.IngestElastic({"host" : "128.173.145.158",\
-             "port" : 9200})
-    indexName = 'indices'
-    typeName = 'dst_data'
-    reqBody = {
-        "settings" : {
-            "number_of_shards": 1,
-            "number_of_replicas": 0
-        },
-
-        'mappings': {
-            typeName: {
-                'properties': {
-                    'dst_index': {'type': 'float'},
-                    'ts': {'type': 'date', 'format':'dateOptionalTime'},
-               }}}
-    }
-    esU.createIndex( indexName, \
-        requestBody=reqBody, deleteOld=True )
-    dataRecs = esU.get_dst_json("dst_out_file.csv")
-    esU.insert_data_recs(indexName, dataRecs)
-
-
-class IngestElastic(object):
+class ElasticUtils(object):
     """
-    A class to insert data into Elasticsearch
+    A class for performing certain functions in ES
     """
     def __init__(self, ES_HOST):
         import elasticsearch
@@ -51,9 +25,9 @@ class IngestElastic(object):
 
     def get_dst_json(self, inpDstFile, indexName='indices',\
          typeName="dst_data"):
+        # Get dst data from csv as an array of jsons
         import pandas
         import datetime
-        # Get dst data from csv as an array of jsons
         dstRecs = [] 
         # read data into a pandas DF
         dstDF = pandas.read_csv(inpDstFile, sep=' ')
