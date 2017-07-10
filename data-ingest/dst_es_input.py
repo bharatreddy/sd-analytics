@@ -4,7 +4,7 @@ if __name__ == "__main__":
     import datetime
     esU = es_utils.ElasticUtils({"host" : "128.173.145.158",\
              "port" : 9200})
-    indexName = 'indices'
+    indexName = 'data-indices'
     typeName = 'dst_data'
     reqBody = {
         "settings" : {
