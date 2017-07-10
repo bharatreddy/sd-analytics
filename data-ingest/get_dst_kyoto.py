@@ -229,7 +229,7 @@ class DownloadDst(object):
             monthStr = "0" + str(month)
         else:
             monthStr = str(month)
-        if year >= 2015:
+        if year >= 2016:
             # create the url
             currUrl = self.homepage + self.realTime + \
                 "/" + str(year) + monthStr + "/index.html"
@@ -248,7 +248,7 @@ class DownloadDst(object):
                     if ( conn.getcode() != 200 ):
                         print "something wrong with url, check if website is running!!!"
                         currUrl = None
-        elif ( (year > 2011) and (year < 2015) ):
+        elif ( (year > 2013) and (year < 2016) ):
             # create the url
             currUrl = self.homepage + self.provisional + \
                 "/" + str(year) + monthStr + "/index.html"

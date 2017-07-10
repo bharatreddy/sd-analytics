@@ -23,38 +23,9 @@ class ElasticUtils(object):
                 print "INDEX ", indexName, " exists! Recheck!"
         return
 
-    def get_dst_json(self, inpDstFile, indexName='indices',\
-         typeName="dst_data"):
-        # Get dst data from csv as an array of jsons
-        import pandas
-        import datetime
-        dstRecs = [] 
-        # read data into a pandas DF
-        dstDF = pandas.read_csv(inpDstFile, sep=' ')
-        # Iterate over rows and create dict
-        # to upload to elasticsearch
-        for ind, row in dstDF.iterrows():
-            dstDict = {}
-            dstDict["dst_index"] = row["dst_index"]
-            epoch = datetime.datetime.utcfromtimestamp(0)
-            currDtObj = datetime.datetime.strptime(row["dst_date"], '%Y-%m-%d %H:%M:%S')
-            newDtObj = currDtObj.strftime( "%Y-%m-%dT%H:%M:%S" )
-            dstDict["ts"] = newDtObj
-            print dstDict
-            op_dict = {
-                "index": {
-                    "_index": indexName, 
-                    "_type": typeName, 
-                    "_id": ind
-                }
-            }
-            dstRecs.append(op_dict)
-            dstRecs.append(dstDict)
-        return dstRecs
-
     def insert_data_recs(self, indexName, dataRecs):
         # Insert data into elastic search
         print "inserting data into elastic search"
         res = self.es.bulk(index = indexName,\
-             body = dataRecs, refresh = True)
+             body = dataRecs, refresh = True, request_timeout=300)
         

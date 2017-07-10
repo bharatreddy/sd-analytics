@@ -24,17 +24,22 @@ if __name__ == "__main__":
     # Get dst data from csv as an array of jsons
     dstRecs = [] 
     # read data into a pandas DF
+    inpDstFile = "dst_out_file.csv"
     dstDF = pandas.read_csv(inpDstFile, sep=' ')
+    # droppint duplicates
+    dstDF = dstDF.drop_duplicates()
     # Iterate over rows and create dict
     # to upload to elasticsearch
     for ind, row in dstDF.iterrows():
+        # We are inserting one record at a time for now
+        # since the bulk insert isn't working well!
+        # newdstRecs = []
         dstDict = {}
         dstDict["dst_index"] = row["dst_index"]
         epoch = datetime.datetime.utcfromtimestamp(0)
         currDtObj = datetime.datetime.strptime(row["dst_date"], '%Y-%m-%d %H:%M:%S')
         newDtObj = currDtObj.strftime( "%Y-%m-%dT%H:%M:%S" )
         dstDict["ts"] = newDtObj
-        print dstDict
         op_dict = {
             "index": {
                 "_index": indexName, 
@@ -44,4 +49,6 @@ if __name__ == "__main__":
         }
         dstRecs.append(op_dict)
         dstRecs.append(dstDict)
+        # newdstRecs.append(op_dict)
+        # newdstRecs.append(dstDict)
     esU.insert_data_recs(indexName, dstRecs)
