@@ -1,7 +1,7 @@
 if __name__ == "__main__":
     import fit_dwnld_data
     import datetime
-    sTime = datetime.datetime( 2011, 1, 1, 0, 0 )
+    sTime = datetime.datetime( 2011, 1, 3, 0, 0 )
     eTime = datetime.datetime( 2011, 2, 1, 0, 0 )
     parentDir = "/home/bharat/Documents/sd-es-vels/"
     fdU = fit_dwnld_data.FitDownloadRecs(sTime, eTime, parentDir)
@@ -45,8 +45,14 @@ class FitDownloadRecs(object):
                      nDate.strftime( "%Y-%m-%dT%H:%M:%S" ) + "--" +\
                       cRad + ".txt"
                 print "working with", currFName
-                res = pydarn.plotting.printRec.fitPrintRec(cDate, nDate,\
+                try: 
+                    res = pydarn.plotting.printRec.fitPrintRec(cDate, nDate,\
                          cRad, currFName )
+                except Exception, e:
+                    print e
+                    print 'problem creating the file--->', currFName
+                print res
+                
 
             cDate = nDate
             nDate += datetime.timedelta(days=1)
