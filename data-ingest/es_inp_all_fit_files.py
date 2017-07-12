@@ -9,4 +9,8 @@ if __name__ == "__main__":
         for indf, fn in enumerate( filenames ):
             print "current file------------------------>", \
                 fn, str(indf+1) + "/" + str( len(filenames) )
-            frU.insert_fit_records(indir+fn)
+            try: 
+                frU.insert_fit_records(indir+fn)
+            except Exception, e:
+                print e
+                print '****problem indexing the file------------->', fn
