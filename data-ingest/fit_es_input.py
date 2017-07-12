@@ -17,7 +17,7 @@ class FitESUtils(object):
         self.fitIndName = "data-superdarn"
         self.fitTypeName = 'fit_data'
         # Once we cross the limit insert the recs in to es
-        self.insertRecLimit = 50000
+        self.insertRecLimit = 100000
 
     def create_fit_index(self):
         # create fit data index for es
